@@ -1,0 +1,29 @@
+root = true
+
+# All files
+[*]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Xml files
+[*.xml]
+indent_size = 2
+
+# yaml files
+[*.yaml]
+indent_size = 2
+
+# markdown files
+[*.md]
+indent_size = 4
+trim_trailing_whitespace = false
+
+# bicep files
+[*.bicep]
+indent_size = 2
+
+# shell scripts
+[*.sh]
+indent_size = 2

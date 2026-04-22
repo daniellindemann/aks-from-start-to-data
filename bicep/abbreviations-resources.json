@@ -1,0 +1,12 @@
+/*
+    Abbreviations for Azure resources based on Microsoft Docs https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
+*/
+{
+  "aks": "aks",
+//   "identity": "id",
+  "keyVault": "kv",
+  "logAnalyticsWorkspace": "log",
+  "resourceGroup": "rg",
+  "sqlDatabase": "sqldb",
+  "sqlServer": "sql"
+}

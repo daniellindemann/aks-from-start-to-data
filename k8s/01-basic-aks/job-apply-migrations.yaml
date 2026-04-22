@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: apply-ef-migrations
+spec:
+  template:
+    spec:
+      containers:
+      - image: daniellindemann/beer-rating-backend-migrations:10
+        imagePullPolicy: Always
+        name: migrations
+        env:
+          - name: CONNECTION_STRING
+            value: 'Server=tcp:beer-rating-db'
+      restartPolicy: Never
