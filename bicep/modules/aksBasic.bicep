@@ -21,6 +21,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2026-01-01' = {
   }
   properties: {
     // basics
+    nodeResourceGroup: 'MC_rg-${ressourceName}'
     kubernetesVersion: kubernetesVersion
     supportPlan: 'KubernetesOfficial'
     dnsPrefix: ressourceName
@@ -150,5 +151,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2026-01-01' = {
 
 output name string = aksCluster.name
 output kubeletObjectId string = aksCluster.properties.identityProfile.kubeletidentity.objectId
-output azureKeyVaultSecretsProviderIdentityObjectId string = aksCluster.properties.addonProfiles.azureKeyvaultSecretsProvider.identity.objectId
-output azureKeyVaultSecretsProviderIdentityClientId string = aksCluster.properties.addonProfiles.azureKeyvaultSecretsProvider.identity.clientId
+output kubeletIdentityObjectId string = aksCluster.properties.identityProfile.kubeletidentity.objectId
+output oidcIssuerUrl string = aksCluster.properties.oidcIssuerProfile.issuerURL
+// output azureKeyVaultSecretsProviderIdentityObjectId string = aksCluster.properties.addonProfiles.azureKeyvaultSecretsProvider.identity.objectId
+// output azureKeyVaultSecretsProviderIdentityClientId string = aksCluster.properties.addonProfiles.azureKeyvaultSecretsProvider.identity.clientId

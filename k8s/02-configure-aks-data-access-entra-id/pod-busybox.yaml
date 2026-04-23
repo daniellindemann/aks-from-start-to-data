@@ -1,0 +1,31 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: test-busybox-keyvault-access
+  labels:
+    azure.workload.identity/use: "true" # This does the magic and authenticates using workload identity
+spec:
+  serviceAccountName: "the-service-account" # [REQUIRED] set it to the service account name
+  containers:
+  - name: busybox
+    image: registry.k8s.io/e2e-test-images/busybox:1.36.1-1
+    command:
+    - "/bin/sleep"
+    - "10000"
+    env:
+    - name: connection-string-beer-rating
+      valueFrom:
+        secretKeyRef:
+          key: connection-string-beer-rating
+          name: appsecrets
+    volumeMounts:
+    - name: appsecrets
+      mountPath: "/mnt/appsecrets"
+      readOnly: true
+  volumes:
+  - name: appsecrets
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: "beer-rating-secrets" # [REQUIRED] set it to the name of the the secretProviderClass

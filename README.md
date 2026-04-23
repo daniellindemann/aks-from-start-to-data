@@ -58,10 +58,10 @@ az deployment sub create \
 1. Get Azure resource names
     - Get AKS resource name from listing: `az aks list -o table --query '[*].{name: name, location: location, resourceGroup: resourceGroup, kubernetesVersion: kubernetesVersion}'`
     - Get Key Vault name from listing: `az keyvault list -o table --query '[*].{name: name, location: location, resourceGroup: resourceGroup}'`
-2. Execute configuration script [`scripts/01-configure-aks.sh`](scripts/01-configure-aks.sh)
+2. Execute configuration script [`scripts/01-configure-basic-aks.sh`](scripts/01-configure-basic-aks.sh)
 
     ```bash
-    scripts/01-configure-aks.sh <AKS-Name> <Key-Vault-Name>
+    scripts/01-configure-basic-aks.sh <AKS-Name> <Key-Vault-Name>
     ```
 
 ---

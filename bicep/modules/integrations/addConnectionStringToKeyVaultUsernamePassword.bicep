@@ -1,7 +1,7 @@
 param keyVaultName string
 param sqlServerName string
-
 param sqlDbName string
+
 @secure()
 param sqlAdminUsername string
 @secure()
