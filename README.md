@@ -83,3 +83,11 @@ az deployment sub create \
 > ```bash
 > scripts/02-configure-aks-data-access-entra-id.sh $(az group list --query "[?contains(name, 'afstd-scenario2')].name" -o tsv)
 > ```
+
+## Clean-up
+
+Run the cleanup script
+
+```bash
+scripts/03-cleanup.sh
+```
