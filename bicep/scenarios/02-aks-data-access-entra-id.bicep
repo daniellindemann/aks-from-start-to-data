@@ -52,7 +52,7 @@ module roleAssignmentManagedIdentityKeyVaultSecretsReader '../modules/integratio
 module sql '../modules/sqlEntraId.bicep' = {
   name: 'module-scenario2-sql-${suffix}'
   params: {
-    ressourceName: '${resourceAbbrs.sqlDatabase}-${scenarioName}'
+    ressourceName: '${resourceAbbrs.sqlServer}-${scenarioName}'
     location: location
     tags: tags
     suffix: suffix

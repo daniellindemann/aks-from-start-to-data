@@ -5,8 +5,7 @@ set -euo pipefail
 script_dir=$(dirname "$0")
 
 # parameters
-aksName=${1:?Parameter aksName is required}
-keyVaultName=${2:?Parameter keyVaultName is required}
+resourceGroupName=${1:?Parameter resourceGroupName is required}
 
 # script variables
 backend_image='daniellindemann/beer-rating-backend:10'
@@ -14,6 +13,11 @@ frontend_image='daniellindemann/beer-rating-frontend:10'
 console_image='daniellindemann/beer-rating-console-beerquotes:10'
 migrations_image='daniellindemann/beer-rating-backend-migrations:10'
 secret_name_connection_string='connection-string-beer-rating'
+
+# retrieve resource names from resource group
+resourceGroupJsonData=$(az resource list --resource-group $resourceGroupName -o json)
+aksName=$(echo "$resourceGroupJsonData" | jq -r '.[] | select(.type == "Microsoft.ContainerService/managedClusters") | .name')
+keyVaultName=$(echo "$resourceGroupJsonData" | jq -r '.[] | select(.type == "Microsoft.KeyVault/vaults") | .name')
 
 # get aks info
 echo "🔎 Get AKS cluster named '${aksName}'"

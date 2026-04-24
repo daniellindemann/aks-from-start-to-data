@@ -30,7 +30,7 @@ if ! command -v k9s &> /dev/null; then
             grep '"tag_name":' | \
             sed -E 's/.*"v([^"]+)".*/\1/' \
     )
-    
+
     # check if file k9s-${k9s_VERSION}.tar.gz already exists in .temp directory
     if [ ! -f "$script_dir/.temp/k9s-${k9s_VERSION}.tar.gz" ]; then
         curl -L -o "$script_dir/.temp/k9s-${k9s_VERSION}.tar.gz" "https://github.com/derailed/k9s/releases/download/v${k9s_VERSION}/k9s_${k9s_VERSION_DOWNLOAD_FILE_SUFFIX}.tar.gz"

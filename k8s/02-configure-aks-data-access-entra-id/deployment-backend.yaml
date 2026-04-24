@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: beer-rating-backend
+  name: beer-rating-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: beer-rating-backend
+  template:
+    metadata:
+      labels:
+        app: beer-rating-backend
+        azure.workload.identity/use: "true" # Required. Only pods with this label can use workload identity.
+    spec:
+      serviceAccountName: id-afstd-sc2-workload
+      containers:
+      - image: daniellindemann/beer-rating-backend:10
+        name: beer-rating-backend
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5179
+        env:
+        - name: Database__UseInMemoryDatabase
+          value: 'false'
+        - name: Database__UseAutoMigration
+          value: 'false'
+        - name: Database__UseDataSeeding
+          value: 'true'
+        - name: ConnectionStrings__Beer
+          valueFrom:
+            secretKeyRef:
+              key: connection-string-beer-rating
+              name: appsecrets
+        volumeMounts:
+        - name: appsecrets
+          mountPath: "/mnt/appsecrets"
+          readOnly: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 32Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+      - image: daniellindemann/beer-rating-console-beerquotes:10
+        name: beer-rating-console-beerquotes
+        imagePullPolicy: Always
+        env:
+        - name: QuoteSleepInSeconds
+          value: '30'
+        resources:
+          requests:
+            cpu: 100m
+            memory: 16Mi
+          limits:
+            cpu: 200m
+            memory: 32Mi
+      volumes:
+      - name: appsecrets
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "beer-rating-secrets" # [REQUIRED] set it to the name of the the secretProviderClass

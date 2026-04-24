@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: beer-rating-frontend
+  name: beer-rating-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: beer-rating-frontend
+  template:
+    metadata:
+      labels:
+        app: beer-rating-frontend
+    spec:
+      containers:
+      - image: daniellindemann/beer-rating-frontend:10
+        name: beer-rating-frontend
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5179
+        env:
+        - name: Backend__HostUrl
+          value: "http://beer-rating-backend.default.svc.cluster.local:8178"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 32Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi

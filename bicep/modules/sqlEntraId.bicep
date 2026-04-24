@@ -6,6 +6,8 @@ param suffix string
 @description('ID of the Entra group that will be the administrator of the SQL server')
 param loginEntraGroupId string
 
+var resourceAbbrs = loadJsonContent('../abbreviations-resources.json')
+
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01' = {
   name: ressourceName
   location: location
@@ -38,7 +40,7 @@ resource sqlFirewallSettings 'Microsoft.Sql/servers/firewallRules@2023-08-01' = 
 
 resource sqlDb 'Microsoft.Sql/servers/databases@2023-08-01' = {
   parent: sqlServer
-  name: 'sqldb-beer-rating-${suffix}'
+  name: '${resourceAbbrs.sqlDatabase}-beer-rating-${suffix}'
   location: location
   tags: tags
   sku: {

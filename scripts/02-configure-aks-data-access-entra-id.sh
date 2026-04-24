@@ -19,6 +19,8 @@ resourceGroupJsonData=$(az resource list --resource-group $resourceGroupName -o 
 aksName=$(echo "$resourceGroupJsonData" | jq -r '.[] | select(.type == "Microsoft.ContainerService/managedClusters") | .name')
 keyVaultName=$(echo "$resourceGroupJsonData" | jq -r '.[] | select(.type == "Microsoft.KeyVault/vaults") | .name')
 workloadIdentityName=$(echo "$resourceGroupJsonData" | jq -r '.[] | select(.type == "Microsoft.ManagedIdentity/userAssignedIdentities") | .name')
+sqlServerName=$(echo "$resourceGroupJsonData" | jq -r '.[] | select(.type == "Microsoft.Sql/servers") | .name')
+sqlDbName=$(echo "$resourceGroupJsonData" | jq -r '.[] | select(.type == "Microsoft.Sql/servers/databases" and (.name | contains("sqldb-beer-rating"))) | .name | split("/")[1]')
 
 # get aks info
 echo "🔎 Get AKS cluster named '${aksName}'"
@@ -105,56 +107,85 @@ echo "SecretProviderClass created"
 
 # create a test busybox pod to test retrieval of secrets from key vault using workload identity
 echo "Create a test busybox pod to test retrieval of secrets from key vault using workload identity"
-busyboxYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/pod-busybox.yaml")"
+busyboxYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/pod-busybox-keyvault-access.yaml")"
 busyBoxYamlServiceAccountReplaced=$(echo "$busyboxYaml" | yq ".spec.serviceAccountName = \"${workloadIdentityName}\"")
 echo "$busyBoxYamlServiceAccountReplaced" | kubectl apply -f -
 echo "Test busybox pod created"
 
+echo "Add firewall rule to allow sql connection from client"
+publicIp=$(curl -s https://ifconfig.io)
+az sql server firewall-rule create \
+    -g $resourceGroupName \
+    -s $sqlServerName \
+    -n script-client-public-ip \
+    --start-ip-address $publicIp \
+    --end-ip-address $publicIp \
+    -o table
+echo "Firewall rule added for ip"
 
+# Grant permissions to the SQL server for the workload identity
+echo "Grant permissions to the SQL server for the workload identity"
+sqlcmd -S "${sqlServerName}.database.windows.net" \
+  -d "${sqlDbName}" \
+  --authentication-method=ActiveDirectoryDefault \
+  -v MemberName="${workloadIdentityName}" \
+  -i "$script_dir/../sql/add-sql-permissions.sql"
+sqlcmd -S "${sqlServerName}.database.windows.net" \
+  -d "${sqlDbName}" \
+  --authentication-method=ActiveDirectoryDefault \
+  -Q "SELECT r.name AS RoleName, m.name AS UserName, m.type_desc AS PrincipalType FROM sys.database_role_members rm JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id JOIN sys.database_principals m ON rm.member_principal_id = m.principal_id WHERE r.type = 'R' AND m.name = '${workloadIdentityName}' ORDER BY r.name, m.name;"
+echo "Permissions granted to SQL server for workload identity"
 
-# # apply migrations using a job
-# echo "Apply EF migrations using a Kubernetes job"
-# migrationsJobYaml="$(cat "$script_dir/../k8s/01-basic-aks/job-apply-migrations.yaml")"
-# replacedMigrationImage=$(echo "$migrationsJobYaml" | yq ".spec.template.spec.containers[0].image = \"${migrations_image}\"")
-# replacedMigrationConnectionString=$(echo "$replacedMigrationImage" | yq "(.spec.template.spec.containers[] | select(.name == \"migrations\") | .env[] | select(.name == \"CONNECTION_STRING\") | .value) = \"${connectionStringSecret}\"")
-# echo "$replacedMigrationConnectionString" | kubectl apply -f -
-# # loop until the job is completed
-# while true; do
-#     jobStatus=$(kubectl get job apply-ef-migrations -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}')
-#     if [[ "$jobStatus" == "True" ]]; then
-#         echo "Migrations job completed successfully"
-#         break
-#     fi
-#     sleep 5
-# done
-# echo "Migrations applied"
+# test sql connection with workload identity
+echo "Create a test sql client pod to test sql connection with workload identity"
+sqlConnectionYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/pod-sqlconnection.yaml")"
+sqlConnectionYamlServiceAccountReplaced=$(echo "$sqlConnectionYaml" | yq ".spec.serviceAccountName = \"${workloadIdentityName}\"")
+echo "$sqlConnectionYamlServiceAccountReplaced" | kubectl apply -f -
+echo "Test sql client pod created"
 
-# # deploy sample app
-# echo "Apply deployments and services"
-# # replace the image name in the deployment yaml file of the backend with the one from container registry
-# backendDeploymentYaml="$(cat "$script_dir/../k8s/01-basic-aks/deployment-backend.yaml")"
-# replacedBackendImage=$(echo "$backendDeploymentYaml" | yq ".spec.template.spec.containers[0].image = \"${backend_image}\"")
-# replacedConsoleImage=$(echo "$replacedBackendImage" | yq ".spec.template.spec.containers[1].image = \"${console_image}\"")
-# replacedBackendConnectionString=$(echo "$replacedConsoleImage" | yq "(.spec.template.spec.containers[] | select(.name == \"beer-rating-backend\") | .env[] | select(.name == \"ConnectionStrings__Beer\") | .value) = \"${connectionStringSecret}\"")
-# echo "$replacedBackendConnectionString" | kubectl apply -f -
-# kubectl apply -f $script_dir/../k8s/shared/service-backend.yaml
-# # ---
-# # replace image name in the deployment yaml file of the frontend with the one from container registry
-# frontendDeploymentYaml="$(cat "$script_dir/../k8s/01-basic-aks/deployment-frontend.yaml")"
-# replacedFrontendImage=$(echo "$frontendDeploymentYaml" | yq ".spec.template.spec.containers[0].image = \"${frontend_image}\"")
-# echo "$replacedFrontendImage" | kubectl apply -f -
-# kubectl apply -f $script_dir/../k8s/shared/service-frontend.yaml
-# echo "Deployments and services applied"
+# apply migrations using a job
+echo "Apply EF migrations using a Kubernetes job"
+migrationsJobYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/job-apply-migrations.yaml")"
+replacedMigrationImage=$(echo "$migrationsJobYaml" | yq ".spec.template.spec.containers[0].image = \"${migrations_image}\"")
+replacedMigrationServiceAccount=$(echo "$replacedMigrationImage" | yq ".spec.template.spec.serviceAccountName = \"${workloadIdentityName}\"")
+echo "$replacedMigrationServiceAccount" | kubectl apply -f -
+# loop until the job is completed
+while true; do
+    jobStatus=$(kubectl get job apply-ef-migrations -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}')
+    if [[ "$jobStatus" == "True" ]]; then
+        echo "Migrations job completed successfully"
+        break
+    fi
+    sleep 5
+done
+echo "Migrations applied"
 
-# # configure ingress
-# echo "Apply ingress rules"
-# kubectl apply -f $script_dir/../k8s/shared/ingress-frontend.yaml
-# echo "Ingress rules applied"
+# deploy sample app
+echo "Apply deployments and services"
+# replace the image name in the deployment yaml file of the backend with the one from container registry
+backendDeploymentYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/deployment-backend.yaml")"
+replacedBackendImage=$(echo "$backendDeploymentYaml" | yq ".spec.template.spec.containers[0].image = \"${backend_image}\"")
+replacedConsoleImage=$(echo "$replacedBackendImage" | yq ".spec.template.spec.containers[1].image = \"${console_image}\"")
+replacedBackendServiceAccount=$(echo "$replacedConsoleImage" | yq ".spec.template.spec.serviceAccountName = \"${workloadIdentityName}\"")
+echo "$replacedBackendServiceAccount" | kubectl apply -f -
+kubectl apply -f $script_dir/../k8s/shared/service-backend.yaml
+# ---
+# replace image name in the deployment yaml file of the frontend with the one from container registry
+frontendDeploymentYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/deployment-frontend.yaml")"
+replacedFrontendImage=$(echo "$frontendDeploymentYaml" | yq ".spec.template.spec.containers[0].image = \"${frontend_image}\"")
+echo "$replacedFrontendImage" | kubectl apply -f -
+kubectl apply -f $script_dir/../k8s/shared/service-frontend.yaml
+echo "Deployments and services applied"
 
-# # kubernetes info
-# kubectl get pods,svc,ingress
+# configure ingress
+echo "Apply ingress rules"
+kubectl apply -f $script_dir/../k8s/shared/ingress-frontend.yaml
+echo "Ingress rules applied"
 
-# # output access info
-# echo "Everything applied successfully"
-# echo "> You can access the application on http://${ingressPublicIp} or http://${ingressPublicIp}.nip.io"
-# echo "> Use ip ${ingressPublicIp} to create a DNS A record for your custom domain"
+# kubernetes info
+kubectl get pods,svc,ingress
+
+# output access info
+echo "Everything applied successfully"
+echo "> You can access the application on http://${ingressPublicIp} or http://${ingressPublicIp}.nip.io"
+echo "> Use ip ${ingressPublicIp} to create a DNS A record for your custom domain"

@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: apply-ef-migrations
+spec:
+  template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true" # Required. Only pods with this label can use workload identity.
+    spec:
+      serviceAccountName: id-afstd-sc2-workload
+      restartPolicy: Never
+      containers:
+      - image: daniellindemann/beer-rating-backend-migrations:10
+        imagePullPolicy: Always
+        name: migrations
+        env:
+        - name: CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              key: connection-string-beer-rating
+              name: appsecrets
+        volumeMounts:
+        - name: appsecrets
+          mountPath: "/mnt/appsecrets"
+          readOnly: true
+      volumes:
+      - name: appsecrets
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "beer-rating-secrets" # [REQUIRED] set it to the name of the the secretProviderClass

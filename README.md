@@ -55,22 +55,31 @@ az deployment sub create \
 
 #### With basic AKS configuration
 
-1. Get Azure resource names
-    - Get AKS resource name from listing: `az aks list -o table --query '[*].{name: name, location: location, resourceGroup: resourceGroup, kubernetesVersion: kubernetesVersion}'`
-    - Get Key Vault name from listing: `az keyvault list -o table --query '[*].{name: name, location: location, resourceGroup: resourceGroup}'`
+1. 1Get resource group using this command: `az group list --query "[?contains(name, 'afstd-scenario1')].name" -o tsv`
 2. Execute configuration script [`scripts/01-configure-basic-aks.sh`](scripts/01-configure-basic-aks.sh)
 
     ```bash
-    scripts/01-configure-basic-aks.sh <AKS-Name> <Key-Vault-Name>
+    scripts/01-configure-basic-aks.sh <Resource-Group-Name>
     ```
 
----
+> 💡 Do it in one command:
+> ```bash
+> scripts/01-configure-basic-aks.sh $(az group list --query "[?contains(name, 'afstd-scenario1')].name" -o tsv)
+> ```
 
+#### With managed identity and AKS workload identity
 
-- was braucht der aks
-  - workload identity
-  - public network access
-  - rbac enabled inkl. azure rbac und permissions
-  - netzwerk so standard wie möglich
-  - standard load balancing
-  - 
+1. Ensure the SQL server system-assigned identity has `Directory Reader` role in Entra ID
+    - To get managed identity name use command `az sql server list --query "[?contains(name, 'afstd-sc2')].name" -o tsv`
+    - Use an Entra ID Account with enough permissions, like `Global Administrator`, to set the role
+2. Get resource group using this command: `az group list --query "[?contains(name, 'afstd-scenario2')].name" -o tsv`
+3. Execute configuration script [`scripts/02-configure-aks-data-access-entra-id.sh`](scripts/02-configure-aks-data-access-entra-id.sh)
+
+    ```bash
+    scripts/02-configure-aks-data-access-entra-id.sh <Resource-Group-Name>
+    ```
+
+> 💡 Do it in one command:
+> ```bash
+> scripts/02-configure-aks-data-access-entra-id.sh $(az group list --query "[?contains(name, 'afstd-scenario2')].name" -o tsv)
+> ```

@@ -37,7 +37,7 @@ module roleAssignmentDeployerKeyVaultAdmin '../modules/integrations/roleAssignme
 module sql '../modules/sqlAdminPassword.bicep' = {
   name: 'module-scenario1-sql-${suffix}'
   params: {
-    ressourceName: '${resourceAbbrs.sqlDatabase}-${scenarioName}'
+    ressourceName: '${resourceAbbrs.sqlServer}-${scenarioName}'
     location: location
     tags: tags
     suffix: suffix
