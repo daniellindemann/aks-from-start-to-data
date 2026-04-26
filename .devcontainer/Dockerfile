@@ -1,9 +1,14 @@
 FROM mcr.microsoft.com/devcontainers/base:noble
 
+# Install VIM
+RUN apt-get update && apt-get install -y vim
+
 # Install SQL Tools: SQLPackage and sqlcmd
 COPY installSqlTools.sh installSqlTools.sh
-RUN bash ./installSqlTools.sh \
-     && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/library-scripts
+RUN bash ./installSqlTools.sh
+
+# Clean up
+RUN apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/library-scripts
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
