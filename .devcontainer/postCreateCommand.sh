@@ -19,6 +19,10 @@ sudo chown -R "$(whoami)" "$HOME"
 
 # install tools
 IS_ARM=$(if [[ $(uname -m) == 'aarch64' || $(uname -m) == "arm64" ]]; then echo true; else echo false; fi)
+# install kubelogin via Azure CLI
+if [ ! -x /usr/local/bin/kubelogin ]; then
+  sudo az aks install-cli
+fi
 # install k9s
 if ! command -v k9s &> /dev/null; then
     echo "Installing k9s"

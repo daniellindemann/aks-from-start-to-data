@@ -6,7 +6,17 @@ This project shows different evolutions of aks clusters with data connections.
 
 > ℹ️ **Info**  
 > The setup steps require [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/).  
-> Install Azure CLI as described on https://learn.microsoft.com/en-us/cli/azure/install-azure-cli and run `az login` to authenticate.
+> Install Azure CLI as described on https://learn.microsoft.com/en-us/cli/azure/install-azure-cli and run `az login` to authenticate.  
+> *Using the Dev Container, the Azure CLI is already installed*
+
+> ℹ️ **Info** 
+> Kubernetes Tools are required for automated setup:
+> - [kubectl](https://kubernetes.io/docs/tasks/tools/) (or install via `az aks install-cli`)
+> - [kubelogin](https://github.com/Azure/kubelogin) (or install via `az aks install-cli`)
+> - [helm](https://helm.sh)
+> - [sqlcmd](https://learn.microsoft.com/en-us/sql/tools/sqlcmd/sqlcmd-download-install?tabs=linux)
+> 
+> *Using the Dev Container, these tools are already installed*
 
 > ℹ️ **Info**  
 > All Azure resource creating commands use the region *Poland Central*. Change it, if required.

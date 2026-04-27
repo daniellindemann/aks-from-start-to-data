@@ -1,11 +1,22 @@
 # Demos
 
+# Prep
+
+- [Azure Ressourcen deployen](README.md#2-deploy-azure-resources)
+- Kubernetes Tools installieren: `az aks install-cli`
+
 ## AKS + SQL DB über Portal erstellen
 
 - [ ] Zeige AKS Erstellung über Portal
     - AKS zeigen
 - [ ] Azure SQL über Portal
     - SQL zeigen
+
+## Nodes prüfen
+
+```bash
+kubectl get nodes -o wide
+```
 
 ## Applikationen deployen
 
@@ -61,6 +72,12 @@ kubectl get pod -o wide
 kubectl create deployment sonic --image=daniellindemann/sonic --replicas=6 --port=8080
 ```
 
+- Testen durch pod löschen --> Neuer Pod wird erstellt
+
+```bash
+kubectl delete pod sonic-...
+```
+
 #### Option B
 
 - Prüfen, was auf dem Kubernetes Cluster läuft
@@ -84,6 +101,13 @@ kubectl create deployment sonic --image=daniellindemann/sonic --replicas=6 --por
 ```bash
 kubectl apply -f deployment-sonic.yaml
 ```
+
+- Testen durch pod löschen --> Neuer Pod wird erstellt
+
+```bash
+kubectl delete pod sonic-...
+```
+
 
 ### Service erstellen
 
@@ -215,7 +239,7 @@ kubectl run --image=daniellindemann/sql-test-connection sql-test -- --wait --que
     - Ingress konfigurieren
 
 ```bash
-scripts/01-configure-basic-aks.sh <Resource-Group-Name>
+scripts/01-configure-basic-aks.sh $(az group list --query "[?contains(name, 'afstd-scenario1')].name" -o tsv)
 ```
 
 ## Erweiterter AKS mit Datazugriff via Entra ID Auth
@@ -247,7 +271,5 @@ scripts/01-configure-basic-aks.sh <Resource-Group-Name>
     - Ingress konfigurieren
 
 ```bash
-scripts/02-configure-aks-data-access-entra-id.sh <Resource-Group-Name>
+scripts/02-configure-aks-data-access-entra-id.sh $(az group list --query "[?contains(name, 'afstd-scenario2')].name" -o tsv)
 ```
-
-
