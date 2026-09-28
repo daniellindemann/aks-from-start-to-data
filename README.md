@@ -1,6 +1,6 @@
 # aks-from-start-to-data
 
-This project shows different evolutions of aks clusters with data connections.
+This project shows different evolutions of AKS clusters with data connections.
 
 ## Deployment
 
@@ -65,7 +65,7 @@ az deployment sub create \
 
 #### With basic AKS configuration
 
-1. 1Get resource group using this command: `az group list --query "[?contains(name, 'afstd-scenario1')].name" -o tsv`
+1. Get resource group using this command: `az group list --query "[?contains(name, 'afstd-scenario1')].name" -o tsv`
 2. Execute configuration script [`scripts/01-configure-basic-aks.sh`](scripts/01-configure-basic-aks.sh)
 
     ```bash
@@ -93,6 +93,9 @@ az deployment sub create \
 > ```bash
 > scripts/02-configure-aks-data-access-entra-id.sh $(az group list --query "[?contains(name, 'afstd-scenario2')].name" -o tsv)
 > ```
+
+> **INFO**  
+> Azure SQL needs the `Directory Readers` role so its server identity can query Microsoft Graph and resolve Microsoft Entra users, groups, and applications during commands such as `CREATE USER FROM EXTERNAL PROVIDER`. This is required because service principals and managed identities cannot use delegated user permissions.
 
 ## Demos
 

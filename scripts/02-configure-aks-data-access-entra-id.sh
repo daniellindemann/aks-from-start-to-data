@@ -97,6 +97,7 @@ echo "$replacedManagedIdentityName" | kubectl apply -f -
 echo "Service Account for workload identity created"
 
 # create secret provider class to retrieve secrets from key vault using workload identity
+echo "Azure Key Vault provider for Secrets Store CSI Driver setup already completed"  # happens by AKS deployment
 echo "Create SecretProviderClass to retrieve secrets from key vault using workload identity"
 secretProviderClassYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/secretProviderClass-backend-secrets.yaml")"
 replacedClientId=$(echo "$secretProviderClassYaml" | yq ".spec.parameters.clientID = \"${managedIdentityClientId}\"")
@@ -161,21 +162,27 @@ done
 echo "Migrations applied"
 
 # deploy sample app
-echo "Apply deployments and services"
+echo "Apply deployments"
 # replace the image name in the deployment yaml file of the backend with the one from container registry
 backendDeploymentYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/deployment-backend.yaml")"
 replacedBackendImage=$(echo "$backendDeploymentYaml" | yq ".spec.template.spec.containers[0].image = \"${backend_image}\"")
 replacedConsoleImage=$(echo "$replacedBackendImage" | yq ".spec.template.spec.containers[1].image = \"${console_image}\"")
 replacedBackendServiceAccount=$(echo "$replacedConsoleImage" | yq ".spec.template.spec.serviceAccountName = \"${workloadIdentityName}\"")
 echo "$replacedBackendServiceAccount" | kubectl apply -f -
-kubectl apply -f $script_dir/../k8s/shared/service-backend.yaml
 # ---
 # replace image name in the deployment yaml file of the frontend with the one from container registry
 frontendDeploymentYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/deployment-frontend.yaml")"
 replacedFrontendImage=$(echo "$frontendDeploymentYaml" | yq ".spec.template.spec.containers[0].image = \"${frontend_image}\"")
 echo "$replacedFrontendImage" | kubectl apply -f -
+echo "Deployments applied"
+
+# deploy services
+echo "Applying services"
+# backend
+kubectl apply -f $script_dir/../k8s/shared/service-backend.yaml
+# frontend
 kubectl apply -f $script_dir/../k8s/shared/service-frontend.yaml
-echo "Deployments and services applied"
+echo "Services applied"
 
 # configure ingress
 echo "Apply ingress rules"

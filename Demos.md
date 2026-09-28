@@ -214,7 +214,7 @@ kubectl get svc
     - Pod erstellen
 
 ```bash
-kubectl run --image=daniellindemann/sql-test-connection sql-test -- --wait --query 'SELECT @@version' --connectionString '<Connection-String>'
+kubectl run -it --rm --restart=Never --image=daniellindemann/sql-test-connection sql-test -- --wait --query 'SELECT @@version' --connectionString '<Connection-String>'
 ```
 
 ## Basic AKS mit SQL Username and Passwort
@@ -238,11 +238,15 @@ kubectl run --image=daniellindemann/sql-test-connection sql-test -- --wait --que
         - Replicas: 3
     - Ingress konfigurieren
 
+Command:
+
 ```bash
 scripts/01-configure-basic-aks.sh $(az group list --query "[?contains(name, 'afstd-scenario1')].name" -o tsv)
 ```
 
 ## Erweiterter AKS mit Datazugriff via Entra ID Auth
+
+> Sicherstellen, dass SQL Server System-Assigned Identity die Entra ID Rolle *Directory Reader* hat.
 
 - Azure Ressourcen durchgehen
     - Managed Identity
@@ -255,10 +259,19 @@ scripts/01-configure-basic-aks.sh $(az group list --query "[?contains(name, 'afs
     - Kubernetes Auth
     - *traefik* Ingress Controller installieren
     - Kubernetes Service Account erstellen für Workload Identity
+        - [`k8s/02-configure-aks-data-access-entra-id/serviceAccount-workloadidentity.yaml`](k8s/02-configure-aks-data-access-entra-id/serviceAccount-workloadidentity.yaml)
+        - Client ID für Auth wird gesetzt
     - Secret Provider Class zum ziehen von Secrets aus Key Vault
-    - Busybox Test Pod erstellen für Key Vault Secret retrieval
+        - [`k8s/02-configure-aks-data-access-entra-id/secretProviderClass-backend-secrets.yaml`](k8s/02-configure-aks-data-access-entra-id/secretProviderClass-backend-secrets.yaml)
+        - Parameter:
+            - Key Vault
+            - Client ID
+            - Tenant ID
+    - Busybox Test Pod erstellen für Key Vault Secret Retrieval
+        - [`k8s/02-configure-aks-data-access-entra-id/pod-busybox-keyvault-access.yaml`](k8s/02-configure-aks-data-access-entra-id/pod-busybox-keyvault-access.yaml)
     - SQL Firewall für aktuellen Client öffnen
     - Grant permissions for managed identity on SQL server
+        - [sql/add-sql-permissions.sql](sql/add-sql-permissions.sql)
     - Test connection
     - Migrations in Datenbank laden
     - Backend Deployment

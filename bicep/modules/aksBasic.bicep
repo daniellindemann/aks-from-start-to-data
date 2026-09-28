@@ -4,7 +4,7 @@ param tags object
 
 param logAnalyticsWorkspaceId string
 param entraAdminGroupObjectIds array
-param kubernetesVersion string = '1.35.1'
+param kubernetesVersion string = '1.36.3'
 param systemNodeCount int = 3
 param systemVmSize string = 'Standard_B2ms'
 

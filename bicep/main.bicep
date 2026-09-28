@@ -1,6 +1,6 @@
 targetScope = 'subscription'
 
-param projectAbbreviation string = 'afstd'
+param projectAbbreviation string = 'afstd'  // WARNING: If you change this value, you must update all scripts and resources using this abbreviation accordingly
 param location string = deployment().location
 param tags object = {}
 
@@ -28,8 +28,8 @@ var allTags = union(
   tags
 )
 var aksShutdownTags = {
-  'auto-aks-start-at-utc': '05:00' // 05:00 UTC = 06:00 CET = 07:00 CEST
-  'auto-aks-stop-at-utc': '17:00' // 17:00 UTC = 18:00 CET = 19:00 CEST
+  'auto-aks-start-at-utc': '06:00' // 06:00 UTC = 07:00 CET = 08:00 CEST
+  'auto-aks-stop-at-utc': '19:00' // 19:00 UTC = 20:00 CET = 21:00 CEST
   'auto-aks-days': 'Mon,Tue,Wed,Thu,Fri,Sat,Sun'
 }
 
