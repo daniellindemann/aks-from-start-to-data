@@ -1,6 +1,6 @@
 # aks-from-start-to-data
 
-This project shows different evolutions of aks clusters with data connections.
+This project shows different evolutions of AKS clusters with data connections.
 
 ## Deployment
 

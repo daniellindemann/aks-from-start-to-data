@@ -105,21 +105,28 @@ done
 echo "Migrations applied"
 
 # deploy sample app
-echo "Apply deployments and services"
+echo "Apply deployments"
 # replace the image name in the deployment yaml file of the backend with the one from container registry
 backendDeploymentYaml="$(cat "$script_dir/../k8s/01-basic-aks/deployment-backend.yaml")"
 replacedBackendImage=$(echo "$backendDeploymentYaml" | yq ".spec.template.spec.containers[0].image = \"${backend_image}\"")
 replacedConsoleImage=$(echo "$replacedBackendImage" | yq ".spec.template.spec.containers[1].image = \"${console_image}\"")
 replacedBackendConnectionString=$(echo "$replacedConsoleImage" | yq "(.spec.template.spec.containers[] | select(.name == \"beer-rating-backend\") | .env[] | select(.name == \"ConnectionStrings__Beer\") | .value) = \"${connectionStringSecret}\"")
 echo "$replacedBackendConnectionString" | kubectl apply -f -
-kubectl apply -f $script_dir/../k8s/shared/service-backend.yaml
+
 # ---
 # replace image name in the deployment yaml file of the frontend with the one from container registry
 frontendDeploymentYaml="$(cat "$script_dir/../k8s/01-basic-aks/deployment-frontend.yaml")"
 replacedFrontendImage=$(echo "$frontendDeploymentYaml" | yq ".spec.template.spec.containers[0].image = \"${frontend_image}\"")
 echo "$replacedFrontendImage" | kubectl apply -f -
+echo "Deployments applied"
+
+# deploy services
+echo "Applying services"
+# backend
+kubectl apply -f $script_dir/../k8s/shared/service-backend.yaml
+# frontend
 kubectl apply -f $script_dir/../k8s/shared/service-frontend.yaml
-echo "Deployments and services applied"
+echo "Services applied"
 
 # configure ingress
 echo "Apply ingress rules"
