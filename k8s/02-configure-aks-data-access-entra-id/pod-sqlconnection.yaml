@@ -25,6 +25,12 @@ spec:
     - "--connectionString"
     - '$(connection-string-beer-rating)'
     - "--wait"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 32Mi
+      limits:
+        cpu: 150m
   volumes:
   - name: appsecrets
     csi:

@@ -10,8 +10,9 @@ spec:
   - name: busybox
     image: registry.k8s.io/e2e-test-images/busybox:1.36.1-1
     command:
-    - "/bin/sleep"
-    - "10000"
+    - "/bin/sh"
+    - "-c"
+    - "while true; do printenv | grep connection-string-beer-rating; sleep 5; done"
     env:
     - name: connection-string-beer-rating
       valueFrom:
@@ -22,6 +23,13 @@ spec:
     - name: appsecrets
       mountPath: "/mnt/appsecrets"
       readOnly: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 32Mi
+      limits:
+        cpu: 150m
+        memory: 64Mi
   volumes:
   - name: appsecrets
     csi:
@@ -29,3 +37,10 @@ spec:
       readOnly: true
       volumeAttributes:
         secretProviderClass: "beer-rating-secrets" # [REQUIRED] set it to the name of the the secretProviderClass
+
+# ----
+
+# Test via command:
+# kubectl exec -it test-busybox-keyvault-access -- printenv | grep connection-string-beer-rating
+# and
+# kubectl logs -f test-busybox-keyvault-access

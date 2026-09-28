@@ -97,6 +97,7 @@ echo "$replacedManagedIdentityName" | kubectl apply -f -
 echo "Service Account for workload identity created"
 
 # create secret provider class to retrieve secrets from key vault using workload identity
+echo "Azure Key Vault provider for Secrets Store CSI Driver setup already completed"  # happens by AKS deployment
 echo "Create SecretProviderClass to retrieve secrets from key vault using workload identity"
 secretProviderClassYaml="$(cat "$script_dir/../k8s/02-configure-aks-data-access-entra-id/secretProviderClass-backend-secrets.yaml")"
 replacedClientId=$(echo "$secretProviderClassYaml" | yq ".spec.parameters.clientID = \"${managedIdentityClientId}\"")
