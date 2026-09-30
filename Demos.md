@@ -1,5 +1,10 @@
 # Demos
 
+> **INFO**:  
+> Bei 1h Talks nur zeigen, dass der Cluster geht
+> - Sonic Deployment
+> - Sonic Service
+
 # Prep
 
 - [Azure Ressourcen deployen](README.md#2-deploy-azure-resources)
@@ -108,10 +113,9 @@ kubectl apply -f deployment-sonic.yaml
 kubectl delete pod sonic-...
 ```
 
-
 ### Service erstellen
 
-- Service für Deployment bereitstellen
+- Service für Deployment bereitstellen (ohne LoadBalancer IP)
 
 ```bash
 kubectl expose deployment sonic --port=8800 --target-port=8080
@@ -123,6 +127,16 @@ kubectl get pod,deployment,replicaset,service
 
 ```bash
 kubectl port-forward service/sonic 8800:8800
+```
+
+---
+
+- Service für Deployment bereitstellen (**mit** LoadBalancer IP)
+
+```bash
+kubectl expose deployment sonic --port=8800 --target-port=8080 --type=LoadBalancer
+kubectl get service
+kubectl get pod,deployment,replicaset,service
 ```
 
 ### Scaling
