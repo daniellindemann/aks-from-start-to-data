@@ -258,6 +258,10 @@ Command:
 scripts/01-configure-basic-aks.sh $(az group list --query "[?contains(name, 'afstd-scenario1')].name" -o tsv)
 ```
 
+- Prüfen
+    - `kubectl describe pod <beer-rating-backend>`
+    - `kubectl exec <beer-rating-backend> -c beer-rating-backend | printenv`
+
 ## Erweiterter AKS mit Datazugriff via Entra ID Auth
 
 > Sicherstellen, dass SQL Server System-Assigned Identity die Entra ID Rolle *Directory Reader* hat.
@@ -300,3 +304,18 @@ scripts/01-configure-basic-aks.sh $(az group list --query "[?contains(name, 'afs
 ```bash
 scripts/02-configure-aks-data-access-entra-id.sh $(az group list --query "[?contains(name, 'afstd-scenario2')].name" -o tsv)
 ```
+- Prüfen
+    - Key Vault Access
+
+        ```bash
+        kubectl exec -it test-busybox-keyvault-access -- printenv | grep connection-string-beer-rating
+        ```
+
+    - SQL Connection
+
+        ```
+        kubectl logs -f sql-test-connection
+        ```
+
+    - `kubectl describe pod <beer-rating-backend>`
+    - `kubectl exec <beer-rating-backend> -c beer-rating-backend | printenv`
