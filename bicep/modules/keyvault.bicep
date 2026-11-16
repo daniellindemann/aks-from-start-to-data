@@ -4,7 +4,7 @@ param tags object
 
 param enableKeyVaultPurgeProtection bool = false
 
-resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2026-05-15' = {
   name: ressourceName
   location: location
   tags: tags

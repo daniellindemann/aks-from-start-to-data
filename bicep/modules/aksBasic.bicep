@@ -4,11 +4,11 @@ param tags object
 
 param logAnalyticsWorkspaceId string
 param entraAdminGroupObjectIds array
-param kubernetesVersion string = '1.36.3'
+param kubernetesVersion string = '1.36.5'
 param systemNodeCount int = 3
 param systemVmSize string = 'Standard_B2ms'
 
-resource aksCluster 'Microsoft.ContainerService/managedClusters@2026-01-01' = {
+resource aksCluster 'Microsoft.ContainerService/managedClusters@2026-08-01' = {
   name: ressourceName
   location: location
   tags: tags

@@ -9,7 +9,7 @@ var keyVaultSecretsUserRole = subscriptionResourceId(
   '4633458b-17de-408a-b874-0445c86b69e6'
 ) // role name: Key Vault Secrets User
 
-resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
+resource keyVault 'Microsoft.KeyVault/vaults@2026-05-15' existing = {
   name: keyVaultName
 }
 

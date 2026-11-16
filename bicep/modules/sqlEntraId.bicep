@@ -8,7 +8,7 @@ param loginEntraGroupId string
 
 var resourceAbbrs = loadJsonContent('../abbreviations-resources.json')
 
-resource sqlServer 'Microsoft.Sql/servers@2023-08-01' = {
+resource sqlServer 'Microsoft.Sql/servers@2025-01-01' = {
   name: ressourceName
   location: location
   tags: tags
@@ -29,7 +29,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01' = {
   }
 }
 
-resource sqlFirewallSettings 'Microsoft.Sql/servers/firewallRules@2023-08-01' = {
+resource sqlFirewallSettings 'Microsoft.Sql/servers/firewallRules@2025-01-01' = {
   parent: sqlServer
   name: 'azure-services'
   properties: {
@@ -38,7 +38,7 @@ resource sqlFirewallSettings 'Microsoft.Sql/servers/firewallRules@2023-08-01' = 
   }
 }
 
-resource sqlDb 'Microsoft.Sql/servers/databases@2023-08-01' = {
+resource sqlDb 'Microsoft.Sql/servers/databases@2025-01-01' = {
   parent: sqlServer
   name: '${resourceAbbrs.sqlDatabase}-beer-rating-${suffix}'
   location: location

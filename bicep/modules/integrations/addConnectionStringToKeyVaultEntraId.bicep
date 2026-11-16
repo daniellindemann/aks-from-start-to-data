@@ -2,15 +2,15 @@ param keyVaultName string
 param sqlServerName string
 param sqlDbName string
 
-resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
+resource keyVault 'Microsoft.KeyVault/vaults@2026-05-15' existing = {
   name: keyVaultName
 }
 
-resource sqlServer 'Microsoft.Sql/servers@2023-08-01' existing = {
+resource sqlServer 'Microsoft.Sql/servers@2025-01-01' existing = {
   name: sqlServerName
 }
 
-resource sqlAdminSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
+resource sqlAdminSecret 'Microsoft.KeyVault/vaults/secrets@2026-05-15' = {
   parent: keyVault
   name: 'connection-string-beer-rating'
   properties: {
