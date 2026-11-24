@@ -103,8 +103,31 @@ See Demo playbook: [Demos.md](Demos.md)
 
 ## Clean-up
 
-Run the cleanup script
+### Reset a cluster for another demo
+
+To undo either configuration script without deleting the Azure infrastructure:
+
+> ⚠️ **Warning**:  
+> This deletes all deployments, pods, jobs, ingress configuration (including Traefik custom resources), SecretProviderClasses, non-default service accounts, and services in the `default` namespace. It also uninstalls the `traefik` Helm release, and deletes the `traefik` namespace.
 
 ```bash
-scripts/03-cleanup.sh
+scripts/03-reset-cluster.sh <Resource-Group-Name>
+```
+
+> 💡 Do it in one command for scenario1:
+> ```bash
+> scripts/03-reset-cluster.sh $(az group list --query "[?contains(name, 'afstd-scenario1')].name" -o tsv)
+> ```
+
+> 💡 Do it in one command for scenario2:
+> ```bash
+> scripts/03-reset-cluster.sh $(az group list --query "[?contains(name, 'afstd-scenario2')].name" -o tsv)
+> ```
+
+### Delete Azure resources
+
+Run the cleanup script to delete the project's resource groups and purge its Key Vaults:
+
+```bash
+scripts/04-cleanup.sh
 ```
