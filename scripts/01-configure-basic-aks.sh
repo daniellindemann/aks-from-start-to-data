@@ -24,7 +24,6 @@ echo "🔎 Get AKS cluster named '${aksName}'"
 aks_json_data=$(az aks list --query "[?name == '${aksName}'].{name: name, resourceGroup: resourceGroup, keyVaultvIdentity: addonProfiles.azureKeyvaultSecretsProvider.identity}[0]" -o json)
 aks_name=$(echo $aks_json_data | jq -r '.name')
 aks_resourceGroup=$(echo $aks_json_data | jq -r '.resourceGroup')
-aks_keyVaultIdentity_clientId=$(echo $aks_json_data | jq -r '.keyVaultvIdentity.clientId')
 echo "🐕 Retrieved '${aks_name}' on resource group '${aks_resourceGroup}'"
 
 # get key vault info
