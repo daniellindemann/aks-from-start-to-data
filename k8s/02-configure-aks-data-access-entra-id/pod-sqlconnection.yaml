@@ -31,6 +31,7 @@ spec:
         memory: 32Mi
       limits:
         cpu: 150m
+        memory: 48Mi
   volumes:
   - name: appsecrets
     csi:
@@ -38,3 +39,11 @@ spec:
       readOnly: true
       volumeAttributes:
         secretProviderClass: "beer-rating-secrets" # [REQUIRED] set it to the name of the the secretProviderClass
+
+# ----
+
+# Get logs:
+# kubectl logs -f sql-test-connection
+# Access:
+# # Test via command:
+# kubectl exec -it sql-test-connection -- /bin/bash
